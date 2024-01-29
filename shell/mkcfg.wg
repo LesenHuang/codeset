@@ -21,15 +21,41 @@ main() {
   echo Client Public Key: $CpubKey
   echo ============================
 
-  for ((i=0; i<$argc; i++)); do
-    case ${argv[$i]} in
-      -h)
-        helpf
-      ;;
-      -f)
-        make_config ${argv[$i + 1]} ${argv[$i + 2]}
-      ;;
-    esac
+  valids=(-p -a -e -h -f)
+
+  for ((j=0; j<${#valids[*]}; j++)); do
+    for ((i=0; i<$argc; i++)); do
+
+      if [ ${argv[$i]} == ${valids[$j]} ]; then
+        case ${argv[$i]} in
+          -p)
+            portregexp='^([1-5][0-9]{4}|6[0-5]{2}[0-3][0-5])$'
+
+            [[ ! ${argv[$i + 1]} =~ $portregexp ]] && echo Invalid argument ${argv[$i + 1]} && exit 1
+            port=${argv[$i + 1]}
+          ;;
+          -a)
+            ipregexp='^([0-9]|[1-9][0-9]|[1-2][0-5][0-5])(.([0-9]|[1-9][0-9]|[1-2][0-5][0-5])){3}$'
+
+            [[ ! ${argv[$i + 1]} =~ $ipregexp ]] && echo Invalid argument ${argv[$i + 1]} && exit 1
+            ServerIP=${argv[$i + 1]}
+          ;;
+          -e)
+            exportsregexp='^([0-9]|[a-z]|[A-Z])+$' 
+
+            [[ ! ${argv[$i + 1]} =~ $exportsregexp ]] && echo Invalid argument ${argv[$i + 1]} && exit 1
+            exports=${argv[$i + 1]}
+          ;;
+          -h)
+            helpf
+          ;;
+          -f)
+            make_config ${argv[$i + 1]} ${argv[$i + 2]}
+          ;;
+        esac
+      fi
+    done
+
   done
 
   [ $argc -eq 0 ] && helpf
@@ -42,9 +68,11 @@ helpf() { echo "Usage: '$0 -f <server file> <client file> .conf format.'"; exit 
 
 make_config() {
 
-  export=eth0
+  [ ! $exports ] && exports=eth0
+  [ ! $port ] && port=51820
+  [ ! $ServerIP ] && ServerIP=`curl test.ipw.cn` # zx2c4.com/ip
 
-  if ! [[ $1 =~ .conf$ ]] && [[ $2 =~ .conf$ ]]; then
+  if ! [[  $1 =~ .conf$ &&  $2 =~ .conf$ ]]; then 
     helpf
   fi
 
@@ -55,10 +83,10 @@ make_config() {
     echo "[Interface] #Server"
     echo "PrivateKey = $key"
     echo "Address = 10.0.0.1"
-    echo "ListenPort = $Port"
+    echo "ListenPort = $port"
 
-    echo "PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT;iptables -t nat -A POSTROUTING -o $export -j MASQUERADE;"
-    echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT;iptables -t nat -D POSTROUTING -o $export -j MASQUERADE;"
+    echo "PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT;iptables -t nat -A POSTROUTING -o $exports -j MASQUERADE;"
+    echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT;iptables -t nat -D POSTROUTING -o $exports -j MASQUERADE;"
 
     echo "[Peer]"
     echo "PublicKey = $Cpubkey"
@@ -76,7 +104,7 @@ make_config() {
 
     echo "[Peer]"
     echo "PublicKey = $Pubkey"
-    echo "Endpoint = $ServerIP:$Port"
+    echo "Endpoint = $ServerIP:$port"
     echo "AllowedIPs = 0.0.0.0/0"
     echo "PersistentKeepalive = 25"
 
@@ -85,7 +113,6 @@ make_config() {
     cat $1
     echo =============================
     cat $2
-    echo $?
     
     return
   fi
