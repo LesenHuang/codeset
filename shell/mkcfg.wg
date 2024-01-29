@@ -1,0 +1,117 @@
+#!/bin/bash
+
+main() {
+
+  argc=${#@}
+  argv=($@)
+  
+  check_wg
+
+  key=$(wg genkey)
+  PubKey=$(echo $key | wg pubkey)
+
+  Ckey=$(wg genkey)
+  CpubKey=$(echo $Ckey | wg pubkey)
+
+  echo ============================
+  echo Server Private Key: $key
+  echo Server Public Key: $PubKey
+
+  echo Client Private Key: $Ckey
+  echo Client Public Key: $CpubKey
+  echo ============================
+
+  for ((i=0; i<$argc; i++)); do
+    case ${argv[$i]} in
+      -h)
+        helpf
+      ;;
+      -f)
+        make_config ${argv[$i + 1]} ${argv[$i + 2]}
+      ;;
+    esac
+  done
+
+  [ $argc -eq 0 ] && helpf
+
+  return 0
+
+}
+
+helpf() { echo "Usage: '$0 -f <server file> <client file> .conf format.'"; exit 0; }
+
+make_config() {
+
+  export=eth0
+
+  if ! [[ $1 =~ .conf$ ]] && [[ $2 =~ .conf$ ]]; then
+    helpf
+  fi
+
+  if ! [ -e $1 -o -e $2 ]; then
+
+  {
+
+    echo "[Interface] #Server"
+    echo "PrivateKey = $key"
+    echo "Address = 10.0.0.1"
+    echo "ListenPort = $Port"
+
+    echo "PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT;iptables -t nat -A POSTROUTING -o $export -j MASQUERADE;"
+    echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT;iptables -t nat -D POSTROUTING -o $export -j MASQUERADE;"
+
+    echo "[Peer]"
+    echo "PublicKey = $Cpubkey"
+    echo "AllowedIPs = 10.0.0.2"
+
+  } > $1
+
+  {
+
+    echo "[Interface] #Client"
+    echo "PrivateKey = $Ckey"
+    echo "Address = 10.0.0.2"
+    echo "MTU = 1420"
+    echo "DNS = 1.1.1.1"
+
+    echo "[Peer]"
+    echo "PublicKey = $Pubkey"
+    echo "Endpoint = $ServerIP:$Port"
+    echo "AllowedIPs = 0.0.0.0/0"
+    echo "PersistentKeepalive = 25"
+
+  } > $2
+    
+    cat $1
+    echo =============================
+    cat $2
+    echo $?
+    
+    return
+  fi
+
+  echo $1 or $2 already exist.
+
+  exit 1;
+
+}
+
+check_wg() {
+
+  if wg; then
+
+    echo "You already installed wg, could exec of next."
+
+  else
+
+    echo "Error: wg command is not exist!!!"
+
+    echo "Please install wireguard tools."
+
+    exit 1;
+
+  fi
+
+}
+
+main $@

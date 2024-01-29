@@ -1,0 +1,22 @@
+#!/usr/bin/expect
+set hostaddr [ lindex $argv 0 ] 
+set username [ lindex $argv 1 ] 
+set password [ lindex $argv 2 ] 
+set command  [ lindex $argv 3 ] 
+set enter "\r"
+set yes "yes\r"
+
+set timeout 30
+
+#session
+spawn ssh $username@$hostaddr
+
+expect {
+  "yes/on" { send $yes; exp_continue }
+  "passphrase" { send $password$enter }
+}
+expect $username { send $command$enter }
+expect $username { send exit$enter }
+expect eof 
+
+#interact

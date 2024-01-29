@@ -1,0 +1,32 @@
+#!/bin/bash
+
+search() {
+	curl	-v \
+				-A "$userAgent" \
+				-H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJHUHJWQ0lteWJ5a1BoZzVrYjBieWJNUzF6Nl94a1ZhQWZQLWh6TUNrM1lNIn0.eyJqdGkiOiI1NjVhMzNkYy1mYjAwLTQzNmEtOTRhZi00YzA4YTEwMjliYzAiLCJleHAiOjE2ODA3MDY0NDUsIm5iZiI6MCwiaWF0IjoxNjgwNjg0ODQ1LCJpc3MiOiJodHRwOi8vMTAuMTIuNjYuMTA1OjgxODAvYXV0aC9yZWFsbXMvZGVtb19yZWFsbSIsImF1ZCI6ImFjY291bnQiLCJzdWIiOiIzNDM2ZDJkMy1jODY4LTQ1MjctODQ3ZC1mMzU3YTIwMTY3NzMiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJwcm9kX3Z1ZSIsImF1dGhfdGltZSI6MCwic2Vzc2lvbl9zdGF0ZSI6IjZjMWVmMWUxLTVmZjAtNGYyNy1iMzQ4LTE4ZTcwY2JkNDFkYyIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cDovLzEwLjEyLjcwLjYwOjgyODAiLCJodHRwczovLzExNy4xMzIuMTgzLjIwNjoyODA4MCIsImh0dHA6Ly9sb2NhbGhvc3Q6ODg4OCIsImh0dHBzOi8vMTI3LjAuMC4xOjI4MDgwIiwiaHR0cDovLzEwLjEyLjcwLjM5OjgwODAiLCJodHRwOi8vMTcyLjE2LjIwLjIyMjoyODc2MSIsImh0dHBzOi8vMTAuMTIuNzAuNDA6MTgwODAiLCJodHRwOi8vMTE3LjEzMi4xODMuMjA2OjI4NzYxIiwiaHR0cDovLzE4My4yMzIuMjU0LjY6ODA4MCIsImh0dHBzOi8vMTkyLjE2OC40NS42OjI4MDgwIiwiaHR0cHM6Ly8xNzIuMTYuMjAuMjIyOjI4MDgwIiwiaHR0cDovLzEwLjEuNS4xMDM6ODA4MCIsImh0dHA6Ly8xMC4xMi42Ni4xMDU6ODA4MCIsImh0dHA6Ly8xMC4xODEuMTIuMTIxOjMwOTEyIiwiaHR0cDovL2xvY2FsaG9zdDo4MDgwIiwiaHR0cDovLzEwLjE4MS4xMi4xMTE6ODA4MCIsImh0dHA6Ly8xMC4xODEuMTIuMTIxOjMwOTEzIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJvZmZsaW5lX2FjY2VzcyIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJlbWFpbCBwcm9maWxlIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJlbXBsb3llZVR5cGUiOiJ1c2VyLmFsYXVkYSIsIm5hbWUiOiJodWFuZ2xlc2VuIOm7hOS5kOajriIsIm1vYmlsZSI6IjE1MDEzOTQxOTQ2IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiaHVhbmdsZXNlbiIsImdpdmVuX25hbWUiOiJodWFuZ2xlc2VuIiwidXNlck5hbWUiOiJodWFuZ2xlc2VuIiwiZmFtaWx5X25hbWUiOiLpu4TkuZDmo64ifQ.EBuMCvf23kxc1zXAkmrsHbXQeejYdHrWm0ttlf8ycZxdekHdCgMlXZ0zOhCzjm_bjmMM0XMrvGSmD12vgz22IYLBY_5vvjvyDHEpwcJgrJFugYkQbRv9oFnf_cc3Mtm2HOCnZADDxhqG0vfNVyD2X1bvZnv8NeEhX0UlepgEcCphCVHF3pwUdMxejgee0tvod_FUdQj7kyxPgSljxm1JmFXF3xAcQaZ4XsAnHiYviNSdQpzlWpZ-kmWzvjl2sIXLMmOz9E4jbRTjBCVrgfs0Caht4pwtKj9ZBH1Cj000Cap9xi40nQJtpa1K81euRQnkw36-Nw6_IaVD48XKGKD0iA" \
+				-H "head_isAdmin: false" \
+				"$1" \
+				--json $2
+				echo
+}
+
+select type in work person
+do
+		case $type in
+			work)
+				search http://10.12.66.105:8080/v1/bpm/runtime/umsHome/instSearch \
+				'{"pageNo":1,"pageSize":20,"subject":"'$1'","instQueryParam":"'$1'","namespace":"alauda"}'
+				break
+			;;
+		person)
+				search http://10.12.66.105:8080/v1/user/pageList  \
+				'{"pageNo":1,"pageSize":20,"search":"'$1'","namespace":"alauda"}' \
+				--data-unlcode="pageNo=1&pageSize=20&search=$1&namespace=alauda"
+				break
+			;;
+		*)
+			echo exit
+			break
+		;;
+	esac
+done

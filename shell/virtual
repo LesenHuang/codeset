@@ -1,0 +1,76 @@
+#!/bin/bash
+
+box_id=1a28fb0f-0179-45d9-8a76-d259c3a97832
+[ ! $virtio ] && virtio="./virtio-win-0.1.240.iso"
+
+main() {
+
+  argc=${#@}
+  argv=($@)
+  options=(-c -s)
+  mod=0
+  vmclass
+
+  for ((i=0; i<argc; i++)); do
+
+    if [ "${options[0]}" == "${argv[$i]}" ] && isSet create_vm; then
+      create_vm ${argv[$i + 1]} ${argv[$i + 2]} ${argv[$i + 3]}
+      mod+=$?
+      unset create_vm
+      continue
+    fi
+
+    if [ "${options[1]}" == "${argv[$i]}" ] && isSet open_vm; then
+      open_vm ${argv[$i + 1]}
+      mod+=$?
+      unset open_vm
+      continue
+    fi
+
+    cmd=$cmd\ ${argv[$i + $mod]}
+  done
+
+  echo $cmd
+
+  $cmd
+
+  unset argc argv options cmd
+}
+
+isSet () {
+  type -t $1 > /dev/null 
+}
+
+vmclass() {
+  cmd=qemu-kvm
+  cmd=$cmd\ -machine\ q35
+  cmd=$cmd\ -enable-kvm
+  cmd=$cmd\ -cpu\ host
+  cmd=$cmd\ -m\ 16G
+  cmd=$cmd\ -smbios\ type=1,uuid=$box_id
+  #cmd=$cmd\ -soundhw\ 
+  cmd=$cmd\ -drive\ file=$virtio,index=1,media=cdrom
+}
+
+open_vm() {
+  if [[ $1 =~ qcow2$ ]] && [ -r $1 -a -w $1 ]; then
+    cmd=$cmd\ -drive\ file=$1,if=virtio,format=qcow2,index=1,media=disk
+  fi
+  return ${#@};
+}
+create_vm() {
+
+  if [ -r $3 -a -w $3 ] && [[ $3 =~ .iso$ ]]; then
+    if [ ! -s ./$1.qcow2 ]; then  
+      qemu-img create -f qcow2 $1.qcow2 $2 > /dev/null
+    fi
+    cmd=$cmd\ -drive\ file=$1.qcow2,format=qcow2,index=0,if=virtio,media=disk
+    cmd=$cmd\ -cdrom\ $3
+    return ${#@};
+  fi
+  echo "Error: Not found iso!!! PS: $0 -c vmname vmsize image"
+  exit 1
+
+}
+
+main $@

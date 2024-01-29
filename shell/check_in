@@ -1,0 +1,236 @@
+#!/bin/bash
+#
+#	Author: Lesen & Huang
+#	Create:	2023 - 5 - 3
+#	Update: 2023 - 9 - 8 Version 2.0
+#	Update: 2023 - 9 - 28 Version 2.9
+#	Update: 2024 - 1 - 15 Version 3.0
+#	Update: 2024 - 1 - 18 Version 3.2
+#
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+baseurl="http://weixintest.aspirecn.com:8081"
+#baseurl="http://wmbsqzwz.zdbs.aspirecn.com"
+
+android="Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/33.0.0.0 Mobile Safari/537.36 MicroMessenger/6.0.0.54_r849063.501 NetType/WIFI"
+
+echo_d() ( echo -e "[`date`]: $@" )
+isDef() ( type -t $1 > /dev/null )
+
+exiterr() {
+
+	echo -e "[`date`] Error: $1
+	UserAgent: 「$user_agent」
+	Id: $json_id" >&2
+	exit 1
+
+}
+
+check_phone_n() {
+
+	phonenumber_regexp='^1[3-9][0-9]{9}$'
+	
+  ! grep -Eq $phonenumber_regexp <<<$phone_number && echo_d "phone number is error." && exit 1;
+
+}
+
+
+json_parse() {
+
+  local json name
+	json=$1
+	name=$2
+
+	echo $json | sed 's/{//g' | sed 's/}//g' | sed 's/"//g' | sed 's/,/\n/g' | grep $name | sed 's/'$name'://g' 2> /dev/null
+}
+
+get_id() {
+  
+  local url
+
+	url="/yddkService/AttendanceApplication/authentication/wechat?mobile=$phone_number"
+
+	curl -A "$user_agent" $baseurl$url || exiterr "get_id curl()."
+
+}
+
+post_info () {
+  
+  local motives address_name untime option url
+  motives=(in out)
+
+  option=location
+	json_locat=$(get_info 2> /dev/null)
+	[ ! $json_locat ] && exiterr "post_info json_info is NULL."
+
+	address_name=`json_parse $json_locat 'name'`
+	[ ! $address_name ] && exiterr "ponst_info address_name is not exist."
+
+  option=todayPunches
+	json_tod=$(get_info 2> /dev/null)
+	[ ! $json_tod ] && exiterr "post_info json_tod is not exist."
+
+	untime=(`json_parse $json_tod 'workStart'` `json_parse $json_tod 'workEnd'`)
+
+	[[ ${untime[$motive]} != "null" ]] && echo_d "checked not need doing!"&& return -1
+
+	url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/punches"
+
+	json_info=$(curl -A "$user_agent" -H "Content-Type: application/json" $baseurl$url -d '{"motive":'$motive',"location":"'$address_name'","effectiveRange":true}' 2> /dev/null) || exiterr "post_info curl()"
+
+	json_tod=$(get_info 2> /dev/null)
+	[ ! $json_tod ] && exiterr "post_info json_tod is not exist."
+	
+	
+	address_name=(`json_parse $json_tod 'startLocation'` `json_parse $json_tod 'endLocation'`)
+	time=(`json_parse $json_tod 'workStart'` `json_parse $json_tod 'workEnd'` `json_parse $json_tod 'workDate'`)
+
+	errno=`json_parse $json_info 'code'`
+	msg=`json_parse $json_info 'message'`
+
+	[ $errno -eq 0 ] && errmsg=success! || errmsg=failure?
+
+  echo "「${time[2]} at ${time[$motive]} o'clock ${motives[$motive]}·${address_name[$motive]}」: $errmsg(`date +%X`)"
+
+	echo 
+}
+
+get_info() { 
+
+	#location punctuality todayPunches
+  local url
+
+  [ ! $company_id ] && exiterr "company_id is not exist."
+  [ ! $staff_id ] && exiterr "staff_id is not exist."
+  [ ! $option ] && exiterr "option is not exist."
+
+
+  url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/$option"
+
+  curl -A "$user_agent" $baseurl$url || exiterr "get_info curl()"
+		
+  echo
+
+}
+
+print_log() {
+	tail -n +135 $0
+}
+
+timeout()
+{
+	if [ -n $minute ] && echo $minute | grep -Eq "^([1-9]|[1-5][0-9])$"; then
+		sleep "$[$RANDOM % $minute * 60]";
+	else
+		helper
+	fi
+}
+
+helper() {
+
+	echo Try \'${0##*/} '[id|up|down|info] phone_number minute.'\' or \'${0##*/} '[all|log|logerr|--help]'\'.
+  exit
+}
+
+setup() {
+
+	local user_agent logdir argv argc option phone_number minute
+
+  argv=($@)
+  argc=${#@}
+  user_agent=$android
+	logdir=/var/log/cron
+
+	if [ ! -d $logdir ]; then
+
+		echo $logdir is not exist. >&2
+		echo mkdir -p $logdir >&2
+		mkdir -p /var/log/cron;
+
+	fi
+
+  for ((i=0;i<$argc;i++)); do
+
+    case ${argv[$i]} in
+
+    -o|--stdout|-a)
+      tail ${argv[$i + 1]} $logdir/stdout
+    ;;&
+    -e|--stderr|-a)
+      tail ${argv[$i + 1]} $logdir/stderr
+    ;;
+    -h|--help)
+
+      helper
+      unset helper
+    ;;
+    -i|--identify)
+
+      init_check
+      phone_number=${argv[$i + 1]}
+      check_phone_n
+      option=punctuality
+
+      json_id=$(get_id 2> /dev/null)
+
+      [ ! "$json_id" ] && exiterr "setup json_id is NULL."
+      company_id=`json_parse $json_id 'companyId'`
+      staff_id=`json_parse $json_id 'staffId'`
+
+      json_pun=$(get_info 2> /dev/null)
+
+      [ ! $json_pun ] && exiterr "setup json_pun is not exist."
+      username=`json_parse $json_pun 'name'`
+
+      [ ! $username ] && exiterr "username is not exist."
+      echo $json_id | jq
+      echo_d $username
+    ;;
+    -u|--signin) motive=0 ;;& -d|--signout) motive=1 ;;& -u|-d|--signin|--signout)
+
+      echo_d Preparing ...
+      minute=${argv[$i + 1]}
+      timeout
+      echo_d Ready. $username
+			post_info
+    ;;
+    #location punctuality todayPunches
+    -l) option=location ;;& -p) option=punctuality ;;& -t) option=todayPunches ;;& -l|-p|-t)
+
+      get_info | jq
+    ;;
+    esac
+
+  done
+
+}
+
+init_check() {
+
+	statusText=`curl -i -H "Content-Type: application/json" -A "$android" $baseurl 2>/dev/null | grep HTTP`
+
+	if [[ $statusText == *"200 OK"* ]]; then
+		echo_d $statusText
+	else
+		echo_d $statusText
+		exiterr "init_check"
+	fi
+
+}
+
+setup $@
+
+auto_log() {
+
+	IFS_OLD=IFS
+
+	IFS=$'\n'
+
+	for line in $(cat <($0))
+	do
+		sed -i '/^history_logger$/i\'"$line" $0;
+	done
+
+	IFS=$IFS_OLD
+}
