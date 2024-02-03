@@ -1,0 +1,100 @@
+#!/bin/bash
+
+main() {
+
+  argc=${#@}
+  argv=($@)
+
+  vailds=(-t -p -h -f)
+  frpcnf_path=/etc/frp.conf
+
+  [ ! -d $frpcnf_path ] && mkdir $frpcnf_path
+
+  for ((i=0; i<${#vailds}; i++)); do
+
+    for ((j=0; j<$argc; j++)); do
+
+      if [[ ${vailds[$i]} == ${argv[$j]} ]]; then
+
+        case ${vailds[$i]} in
+
+        -t) 
+          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && token=${argv[$i + 1]}
+        ;;
+        -p)
+          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && port=${argv[$i + 1]}
+        ;;
+        -f) # <server file name> <client file name>
+          
+          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && sfile=${argv[$i + 1]}
+
+          [[ ${argv[$i + 2]} =~ ([0-9]|[A-z])+ ]] && cfile=${argv[$i + 2]}
+
+          [ ! $token ] && token=lesen
+          [ ! $port ] && port=7000
+
+          create_frps > $frpcnf_path/frps.toml
+          create_serve Server "`which frps` -c $frpcnf_path/frps.toml" \
+            > /etc/systemd/system/frps.service
+
+          create_frpc > $frpcnf_path/frpc.toml
+          create_serve Client "`which frps` -c $frpcnf_path/frpc.toml" \
+            > /etc/systemd/system/frpc.service
+
+        -h)
+        ;;
+
+        esac
+      fi
+
+    done
+
+  done
+  
+}
+
+create_serve() {
+
+  platform=$1
+  ExecStart=$2
+  
+  echo [Unit]
+  echo Description=Frp $1 Service
+  echo After=network-online.target
+
+  echo [Service]
+  echo Type=simple
+  echo User=root
+  echo Restart=on-failure
+  echo RestartSec=5s
+  echo ExecStart=$2
+  echo LimitNOFILE=1048576
+
+  echo [Install]
+  echo WantedBy=multi-user.target
+}
+
+create_frps() {
+
+  echo "bindPort = $port"
+  echo "auth.token = $token"
+
+}
+
+create_frpc() {
+
+  echo "serverAddr = `curl zx2c4.com/ip >/dev/null`"
+  echo "serverPort = $port"
+  echo "auth.token = $token"
+
+  echo "[[proxies]]"
+  echo 'name = "ssh"'
+  echo 'type = "tcp"'
+
+  echo 'localIP = "127.0.0.1"'
+  echo "localPort = 22"
+  echo "remotePort = 6000"
+
+}
+
+main $@
