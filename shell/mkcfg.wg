@@ -8,17 +8,17 @@ main() {
   check_wg
 
   key=$(wg genkey)
-  PubKey=$(echo $key | wg pubkey)
+  Pubkey=$(echo $key | wg pubkey)
 
   Ckey=$(wg genkey)
-  CpubKey=$(echo $Ckey | wg pubkey)
+  Cpubkey=$(echo $Ckey | wg pubkey)
 
   echo ============================
   echo Server Private Key: $key
-  echo Server Public Key: $PubKey
+  echo Server Public Key: $Pubkey
 
   echo Client Private Key: $Ckey
-  echo Client Public Key: $CpubKey
+  echo Client Public Key: $Cpubkey
   echo ============================
 
   valids=(-p -a -e -h -f)
@@ -35,7 +35,7 @@ main() {
             port=${argv[$i + 1]}
           ;;
           -a)
-            ipregexp='^([0-9]|[1-9][0-9]|[1-2][0-5][0-5])(.([0-9]|[1-9][0-9]|[1-2][0-5][0-5])){3}$'
+            ipregexp='^([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5]{2})(.([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-5]{2})){3}$'
 
             [[ ! ${argv[$i + 1]} =~ $ipregexp ]] && echo Invalid argument ${argv[$i + 1]} && exit 1
             ServerIP=${argv[$i + 1]}
@@ -82,14 +82,16 @@ make_config() {
 
     echo "[Interface] #Server"
     echo "PrivateKey = $key"
-    echo "Address = 10.0.0.1"
+    echo "Address 	 = 10.0.0.1"
     echo "ListenPort = $port"
 
-    echo "PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT;iptables -t nat -A POSTROUTING -o $exports -j MASQUERADE;"
-    echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT;iptables -t nat -D POSTROUTING -o $exports -j MASQUERADE;"
+    echo "PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o $exports -j MASQUERADE"
+    echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o $exports -j MASQUERADE"
+    echo "# vim /etc/sysctl.conf"
+    echo "# net.ipv4.ip_forward =1"
 
     echo "[Peer]"
-    echo "PublicKey = $Cpubkey"
+    echo "PublicKey  = $Cpubkey"
     echo "AllowedIPs = 10.0.0.2"
 
   } > $1
