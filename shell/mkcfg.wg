@@ -70,7 +70,7 @@ make_config() {
 
   [ ! $exports ] && exports=eth0
   [ ! $port ] && port=51820
-  [ ! $ServerIP ] && ServerIP=`curl 4.ipw.cn > /dev/null` # zx2c4.com/ip
+  [ ! $ServerIP ] && ServerIP=`curl zx2c4.com/ip > /dev/null` # 4.ipw.cn
 
   if ! [[  $1 =~ .conf$ &&  $2 =~ .conf$ ]]; then 
     helpf
