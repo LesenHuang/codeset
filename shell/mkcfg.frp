@@ -7,10 +7,11 @@ main() {
 
   vailds=(-t -p -h -f)
   frpcnf_path=/etc/frp.conf
+  frpsys_path=/etc/systemd/system
 
   [ ! -d $frpcnf_path ] && mkdir $frpcnf_path
 
-  for ((i=0; i<${#vailds}; i++)); do
+  for ((i=0; i<${#vailds[@]}; i++)); do
 
     for ((j=0; j<$argc; j++)); do
 
@@ -25,32 +26,50 @@ main() {
           [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && port=${argv[$i + 1]}
         ;;
         -f) # <server file name> <client file name>
-          
-          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && sfile=${argv[$i + 1]}
 
-          [[ ${argv[$i + 2]} =~ ([0-9]|[A-z])+ ]] && cfile=${argv[$i + 2]}
+          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && sfile=${argv[$i + 1]} || helpf && exit 1
 
-          [ ! $token ] && token=lesen
-          [ ! $port ] && port=7000
+          [[ ${argv[$i + 2]} =~ ([0-9]|[A-z])+ ]] && cfile=${argv[$i + 2]} || helpf && exit 2
 
-          create_frps > $frpcnf_path/frps.toml
-          create_serve Server "`which frps` -c $frpcnf_path/frps.toml" \
-            > /etc/systemd/system/frps.service
 
-          create_frpc > $frpcnf_path/frpc.toml
-          create_serve Client "`which frps` -c $frpcnf_path/frpc.toml" \
-            > /etc/systemd/system/frpc.service
+          [ $sfile ] && toml=$sfile.toml && service=$sfile.service
+          [ $cfile ] && Ctoml=$cfile.toml && Cservice=$cfile.service
 
-        -h)
+        ;;
+        -h)#TODO
+          helpf && exit
         ;;
 
         esac
+
+        argv[$i]=
       fi
 
     done
 
   done
   
+        [ ! $token ] && token=lesen
+        [ ! $port ] && port=7000
+        [ ! $toml ] && toml=$frpsys_path/frps.service
+        [ ! $Ctoml ] && Ctoml=$frpsys_path/frps.service
+        [ ! $service ] && service=$frpsys_path/frpc.service
+        [ ! $Cservice ] && Cservice=$frpsys_path/frpc.service
+
+        create_frps > $toml
+        create_serve Server "`which frps` -c $frpcnf_path/frps.toml" \
+        > $service
+
+        create_frpc > $Ctoml
+        create_serve Client "`which frpc` -c $frpcnf_path/frpc.toml" \
+        > $Cservice
+}
+
+helpf() {
+  echo -e "Usage:\t-f\t<Server File Name>\t<Client File Name>"
+  echo -e "\t-p\t<Server Port>"
+  echo -e "\t-t\t<Auth Token>"
+  echo -e "\t-h\thelp manual"
 }
 
 create_serve() {
