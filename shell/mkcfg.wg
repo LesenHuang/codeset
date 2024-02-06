@@ -70,7 +70,7 @@ make_config() {
 
   [ ! $exports ] && exports=eth0
   [ ! $port ] && port=51820
-  [ ! $ServerIP ] && ServerIP=`curl zx2c4.com/ip > /dev/null` # 4.ipw.cn
+  [ ! $ServerIP ] && ServerIP=`curl zx2c4.com/ip 2> /dev/null | sed -n '1p'` # 4.ipw.cn
 
   if ! [[  $1 =~ .conf$ &&  $2 =~ .conf$ ]]; then 
     helpf
@@ -80,15 +80,19 @@ make_config() {
 
   {
 
-    echo "[Interface] #Server"
+    echo "[Interface] # Server"
     echo "PrivateKey = $key"
     echo "Address 	 = 10.0.0.1"
     echo "ListenPort = $port"
+    echo
 
     echo "PostUp   = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o $exports -j MASQUERADE"
     echo "PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o $exports -j MASQUERADE"
     echo "# vim /etc/sysctl.conf"
-    echo "# net.ipv4.ip_forward =1"
+    echo "# net.ipv4.ip_forward = 1"
+    echo "# sysctl -p"
+    echo "# or"
+    echo "# sysctl -e net.ipv4.ip_forward = 1"
 
     echo "[Peer]"
     echo "PublicKey  = $Cpubkey"
@@ -98,16 +102,22 @@ make_config() {
 
   {
 
-    echo "[Interface] #Client"
+    echo "[Interface] # Client"
     echo "PrivateKey = $Ckey"
-    echo "Address = 10.0.0.2"
-    echo "MTU = 1420"
-    echo "DNS = 1.1.1.1"
+    echo "Address    = 10.0.0.2"
+    echo "MTU        = 1420"
+    echo "DNS        = 1.1.1.1, 8.8.8.8, 114.114.114.114"
+    echo
 
-    echo "[Peer]"
+    echo "[Peer] # Mac"
     echo "PublicKey = $Pubkey"
     echo "Endpoint = $ServerIP:$port"
-    echo "AllowedIPs = 0.0.0.0/0"
+    echo "#AllowedIPs = 0.0.0.0/0"
+    echo "AllowedIPs = 0.0.0.0/5, 8.0.0.0/7, 11.0.0.0/8, 12.0.0.0/6, 16.0.0.0/4, 32.0.0.0/3, 64.0.0.0/2, \
+128.0.0.0/3, 160.0.0.0/5, 168.0.0.0/6, 172.0.0.0/12, 172.32.0.0/11, 172.64.0.0/10, 172.128.0.0/9, \
+173.0.0.0/8, 174.0.0.0/7, 176.0.0.0/4, 192.0.0.0/9, 192.128.0.0/11, 192.160.0.0/13, 192.169.0.0/16, \
+192.170.0.0/15, 192.172.0.0/14, 192.176.0.0/12, 192.192.0.0/10, 193.0.0.0/8, 194.0.0.0/7, 196.0.0.0/6, \
+200.0.0.0/5, 208.0.0.0/4, 1.1.1.1/32"
     echo "PersistentKeepalive = 25"
 
   } > $2
