@@ -3,7 +3,7 @@
 
 int main()
 {
-  size_t  size = 256;
+  size_t  size = 128;
 
   printf("There is alpha and number: ");
 
