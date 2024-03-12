@@ -1,8 +1,8 @@
 name: CW
 on:
   schedule:
-  - cron: "1 8 * * 1-5"
-  - cron: "2 8 * * 1-5"
+  - cron: "14 8 * * 1-5"
+  - cron: "15 8 * * 1-5"
 jobs:
   job_one:
     runs-on: ubuntu-latest
