@@ -1,10 +1,11 @@
-name: CI
+name: CW
 on: [push]
 jobs:
-  my_job:
-    name: check_in on work
-    runs-on: ubuntu-18.04
+  my-job:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - run:
-       bash shell/check_in -i 15013941946 -t
+    - name: check_in on work
+      run: 
+        echo check work
+        bash sheck/check_in -i 15013941946 -t
