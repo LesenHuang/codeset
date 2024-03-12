@@ -1,7 +1,7 @@
 name: CW
 on:
   schedule:
-  - cron: '50 12 * * 1-5'
+  - cron: '10 21 * * 1-5'
 jobs:
   myJob:
     runs-on: ubuntu-latest
