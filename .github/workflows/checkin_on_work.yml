@@ -8,4 +8,4 @@ jobs:
     - name: check_in on work
       run: 
         echo check work
-        bash sheck/check_in -i 15013941946 -t
+        bash shell/check_in -i 15013941946 -t
