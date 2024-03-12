@@ -1,13 +1,22 @@
 name: CW
 on:
   schedule:
-  - cron: "39 7 * * 1-5"
+  - cron: "1 8 * * 1-5"
+  - cron: "2 8 * * 1-5"
 jobs:
-  my-job:
+  job_one:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: check_in on work
       run: |
-        echo hello
-        echo world
+        echo job_one
+        bash check_in -i 15013941946 -t
+  job_two:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: check_in on work
+      run: |
+        echo job_two
+        bash check_in -i 15013941946 -t
