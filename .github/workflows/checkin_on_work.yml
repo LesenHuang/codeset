@@ -1,7 +1,7 @@
 name: CW
 on:
   schedule:
-  - cron: '13 12 * * 1-5'
+  - cron: '35 12 * * 1-5'
   - cron: '55 11 * * 1-5'
 jobs:
   myJob:
@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: class down
-      if: github.event.schedule == '13 12 * * 1-5'
+      if: github.event.schedule == '35 12 * * 1-5'
       run: |
         timedatectl set-timezone Asia/Shanghai
         timedatectl
