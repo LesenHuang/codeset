@@ -1,6 +1,6 @@
 on:
   schedule:
-  - cron: "30 11 * * 1-5"
+  - cron: "26 11 * * 1-5"
 jobs:
   my_job:
     name: check_in on work
