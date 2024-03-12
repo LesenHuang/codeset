@@ -1,0 +1,13 @@
+name: 4.ipw.cn
+on:
+  schedule:
+  - cron: '25 9 * * 1-5'
+jobs:
+  caseJob:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run:
+        echo exec...
+        curl 4.ipw.cn
+        
