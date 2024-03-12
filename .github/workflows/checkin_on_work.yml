@@ -1,20 +1,20 @@
 name: CW
 on:
   schedule:
-  - cron: "40 8 * * 1-5"
-  - cron: "33 8 * * 1-5"
+  - cron: "55 8 * * 1-5"
+  - cron: "5 9 * * 1-5"
 jobs:
   myJob:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: job_one
-      if: github.event.schedule == '40 8 * * 1-5'
+      if: github.event.schedule = '55 8 * * 1-5'
       run: |
         echo job_one
         bash check_in -i 15013941946 -t
     - name: job_two
-      if: github.event.schedule == '33 8 * * 1-5'
+      if: github.event.schedule = '5 9 * * 1-5'
       run: |
         echo job_two
         bash check_in -i 15013941946 -t
