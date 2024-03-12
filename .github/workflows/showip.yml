@@ -10,4 +10,5 @@ jobs:
     - run: |
         echo exec...
         curl 4.ipw.cn
+        curl -V
         
