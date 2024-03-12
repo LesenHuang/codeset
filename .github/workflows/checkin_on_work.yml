@@ -1,13 +1,13 @@
 name: CW
 on:
   schedule:
-  - cron: '10 21 * * 1-5'
+  - cron: "15 13 * * 1-5"
 jobs:
   myJob:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: class down
+    - name: class down 
       run: |
         timedatectl set-timezone Asia/Shanghai
         timedatectl
