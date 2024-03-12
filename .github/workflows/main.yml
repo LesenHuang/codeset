@@ -1,0 +1,11 @@
+on:
+  schedule:
+  - cron: "30 11 * * 1-5"
+jobs:
+  my_job:
+    name: check_in on work
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - run:
+       bash shell/check_in -i 15013941946 -t
