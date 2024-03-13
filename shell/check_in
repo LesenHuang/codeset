@@ -60,9 +60,9 @@ post_info () {
   motives=(in out)
 
   option=location
-  get_info
-  #[ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
-  #echo $json_locat
+  json_locat=`get_info 2> /dev/null`
+  [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
+  echo $json_locat
 
   #address_name=`json_parse "$json_locat" 'name'`
   #[ ! "$address_name" ] && exiterr "post_info address_name is not exist."
@@ -104,14 +104,6 @@ get_info() {
   [ ! $company_id ] && exiterr "company_id is not exist."
   [ ! $staff_id ] && exiterr "staff_id is not exist."
   [ ! $option ] && exiterr "option is not exist."
-
-  url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/$option"
-  echo -------- url ------------
-  echo $url
-  echo -------- baseurl --------
-  echo $baseurl
-  echo -------- user-agent ---------
-  echo $user_agent
 
   curl -A "$user_agent" $baseurl$url
 
@@ -171,7 +163,6 @@ setup() {
   -h
   --help
   )
-
 
   for ((i=0;i<$argc;i++)); do
 
