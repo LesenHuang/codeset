@@ -202,9 +202,10 @@ setup() {
       staff_id=`json_parse $json_id 'staffId'`
 
       json_pun=$(get_info 2> /dev/null)
-      echo $json_pun | jq
+      echo $json_pun
       [ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
       username=`json_parse $json_pun 'name'`
+      echo $username
 
       [ ! "$username" ] && exiterr "username is not exist."
       echo $json_id | jq
