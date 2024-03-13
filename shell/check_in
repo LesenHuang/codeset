@@ -42,7 +42,7 @@ json_parse() {
   json=$1
   name=$2
 
-  echo $json | sed 's/{//g' | sed 's/}//g' | sed 's/"//g' | sed 's/,/\n/g' | grep $name | sed 's/'$name'://g' 2> /dev/null
+  echo $json | sed 's/{//g' | sed 's/}//g' | sed 's/"//g' | sed 's/,/\n/g' | grep $name | sed 's/'$name'://g'
 }
 
 get_id() {
