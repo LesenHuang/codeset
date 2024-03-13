@@ -56,39 +56,38 @@ get_id() {
 }
 
 post_info () {
-  
+
   local motives address_name untime option url
   motives=(in out)
 
   option=location
   json_locat=$(get_info 2>/dev/null)
   [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
-  echo $json_locat
-  address_name=`json_parse $json_locat 'name'`
-  [ ! "$address_name" ] && exiterr "ponst_info address_name is not exist."
+
+  address_name=`json_parse "$json_locat" 'name'`
+  [ ! "$address_name" ] && exiterr "post_info address_name is not exist."
   echo $address_name
-  return
+
   option=todayPunches
   json_tod=$(get_info 2> /dev/null)
   [ ! "$json_tod" ] && exiterr "post_info json_tod is not exist."
 
-  untime=(`json_parse $json_tod 'workStart'` `json_parse $json_tod 'workEnd'`)
+  untime=(`json_parse "$json_tod" 'workStart'` `json_parse "$json_tod" 'workEnd'`)
 
-  [[ ${untime[$motive]} != "null" ]] && echo_d "checked not need doing!"&& return -1
+  [[ ${untime[$motive]} != "null" ]] && echo_d "checked not need doing!" && return -1
 
   url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/punches"
 
   json_info=$(curl -A "$user_agent" -H "Content-Type: application/json" $baseurl$url -d '{"motive":'$motive',"location":"'$address_name'","effectiveRange":true}' 2> /dev/null) || exiterr "post_info curl()"
 
   json_tod=$(get_info 2> /dev/null)
-  [ ! $json_tod ] && exiterr "post_info json_tod is not exist."
-  
-  
-  address_name=(`json_parse $json_tod 'startLocation'` `json_parse $json_tod 'endLocation'`)
-  time=(`json_parse $json_tod 'workStart'` `json_parse $json_tod 'workEnd'` `json_parse $json_tod 'workDate'`)
+  [ ! "$json_tod" ] && exiterr "post_info json_tod is not exist."
 
-  errno=`json_parse $json_info 'code'`
-  msg=`json_parse $json_info 'message'`
+  address_name=(`json_parse "$json_tod" 'startLocation'` `json_parse "$json_tod" 'endLocation'`)
+  time=(`json_parse "$json_tod" 'workStart'` `json_parse "$json_tod" 'workEnd'` `json_parse "$json_tod" 'workDate'`)
+
+  errno=`json_parse "$json_info" 'code'`
+  msg=`json_parse "$json_info" 'message'`
 
   [ $errno -eq 0 ] && errmsg=success! || errmsg=failure?
 
@@ -105,6 +104,7 @@ get_info() {
   [ ! $company_id ] && exiterr "company_id is not exist."
   [ ! $staff_id ] && exiterr "staff_id is not exist."
   [ ! $option ] && exiterr "option is not exist."
+
   echo $company_id $staff_id $option
   echo $user_agent
   echo $baseurl$url
@@ -198,14 +198,13 @@ setup() {
       json_id=$(get_id 2> /dev/null)
 
       [ ! "$json_id" ] && exiterr "setup json_id is NULL."
-      company_id=`json_parse $json_id 'companyId'`
-      staff_id=`json_parse $json_id 'staffId'`
+      company_id=`json_parse "$json_id" 'companyId'`
+      staff_id=`json_parse "$json_id" 'staffId'`
 
       json_pun=$(get_info 2> /dev/null)
-      echo $json_pun
+
       [ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
       username=`json_parse "$json_pun" 'name'`
-      echo $username
 
       [ ! "$username" ] && exiterr "username is not exist."
       echo $json_id | jq
