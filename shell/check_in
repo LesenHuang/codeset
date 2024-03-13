@@ -60,18 +60,19 @@ post_info () {
   motives=(in out)
 
   option=location
-  json_locat="`get_info 2> /dev/null`"
+  json_locat=`get_info 2> /dev/null`
   [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
   echo "$json_locat"
+  echo $json_locat
 
-  #address_name=`json_parse "$json_locat" 'name'`
-  #[ ! "$address_name" ] && exiterr "post_info address_name is not exist."
-  #echo $address_name
+  address_name=`json_parse "$json_locat" 'name'`
+  [ ! "$address_name" ] && exiterr "post_info address_name is not exist."
+  echo $address_name
 
   option=todayPunches
   json_tod=$(get_info 2> /dev/null)
   [ ! "$json_tod" ] && exiterr "post_info json_tod is not exist."
-  echo $json_tod
+  echo "$json_tod"
 
   untime=(`json_parse "$json_tod" 'workStart'` `json_parse "$json_tod" 'workEnd'`)
 
@@ -194,14 +195,15 @@ setup() {
       company_id=`json_parse "$json_id" 'companyId'`
       staff_id=`json_parse "$json_id" 'staffId'`
 
-      #json_pun=$(get_info 2> /dev/null)
+      json_pun=$(get_info 2> /dev/null)
 
-      #[ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
-      # username=`json_parse "$json_pun" 'name'`
+      [ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
+      username=`json_parse "$json_pun" 'name'`
+      echo "$json_pun"
 
-      #[ ! "$username" ] && exiterr "username is not exist."
+      [ ! "$username" ] && exiterr "username is not exist."
       echo $json_id | jq
-      #echo_d $username
+      echo_d $username
     ;;
     -u|--signin) motive=0 ;;& -d|--signout) motive=1 ;;& -u|-d|--signin|--signout)
 
