@@ -105,10 +105,6 @@ get_info() {
   [ ! $staff_id ] && exiterr "staff_id is not exist."
   [ ! $option ] && exiterr "option is not exist."
 
-  echo $company_id $staff_id $option
-  echo $user_agent
-  echo $baseurl$url
-
   url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/$option"
 
   curl -A "$user_agent" $baseurl$url || exiterr "get_info curl()"
