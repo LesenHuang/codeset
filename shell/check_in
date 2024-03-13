@@ -35,7 +35,6 @@ check_phone_n() {
 
 }
 
-
 json_parse() {
 
   local json name
@@ -46,7 +45,7 @@ json_parse() {
 }
 
 get_id() {
-  
+
   local url
 
   url="/yddkService/AttendanceApplication/authentication/wechat?mobile=$phone_number"
@@ -108,7 +107,7 @@ get_info() {
 
   url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/$option"
 
-  curl -A "$user_agent" $baseurl$url || exiterr "get_info curl()"
+  curl -A "$user_agent" $baseurl$url
     
   echo
 
@@ -198,14 +197,14 @@ setup() {
       company_id=`json_parse "$json_id" 'companyId'`
       staff_id=`json_parse "$json_id" 'staffId'`
 
-      json_pun=$(get_info 2> /dev/null)
+      #json_pun=$(get_info 2> /dev/null)
 
-      [ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
-      username=`json_parse "$json_pun" 'name'`
+      #[ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
+      # username=`json_parse "$json_pun" 'name'`
 
-      [ ! "$username" ] && exiterr "username is not exist."
+      #[ ! "$username" ] && exiterr "username is not exist."
       echo $json_id | jq
-      echo_d $username
+      #echo_d $username
     ;;
     -u|--signin) motive=0 ;;& -d|--signout) motive=1 ;;& -u|-d|--signin|--signout)
 
