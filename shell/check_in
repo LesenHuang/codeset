@@ -60,13 +60,13 @@ post_info () {
   motives=(in out)
 
   option=location
-  json_locat=$(get_info)
-  [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
-  echo $json_locat
+  get_info
+  #[ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
+  #echo $json_locat
 
-  address_name=`json_parse "$json_locat" 'name'`
-  [ ! "$address_name" ] && exiterr "post_info address_name is not exist."
-  echo $address_name
+  #address_name=`json_parse "$json_locat" 'name'`
+  #[ ! "$address_name" ] && exiterr "post_info address_name is not exist."
+  #echo $address_name
 
   option=todayPunches
   json_tod=$(get_info 2> /dev/null)
@@ -113,7 +113,7 @@ get_info() {
   echo -------- user-agent ---------
   echo $user_agent
 
-  curl -A "$user_agent" "$baseurl$url"
+  curl -A "$user_agent" $baseurl$url
 
 }
 
