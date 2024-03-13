@@ -62,7 +62,7 @@ post_info () {
   option=location
   json_locat="`get_info 2> /dev/null`"
   [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
-  echo $json_locat
+  echo "$json_locat"
 
   #address_name=`json_parse "$json_locat" 'name'`
   #[ ! "$address_name" ] && exiterr "post_info address_name is not exist."
@@ -71,6 +71,7 @@ post_info () {
   option=todayPunches
   json_tod=$(get_info 2> /dev/null)
   [ ! "$json_tod" ] && exiterr "post_info json_tod is not exist."
+  echo $json_tod
 
   untime=(`json_parse "$json_tod" 'workStart'` `json_parse "$json_tod" 'workEnd'`)
 
