@@ -8,6 +8,4 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: class down 
-      run: |
-        echo class down
-        bash shell/check_in -i 15013941946 -u 1
+      run: echo
