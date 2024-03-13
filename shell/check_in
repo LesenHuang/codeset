@@ -109,13 +109,11 @@ get_info() {
   echo -------- url ------------
   echo $url
   echo -------- baseurl --------
-  echo $base
+  echo $baseurl
   echo -------- user-agent ---------
   echo $user_agent
 
   curl -A "$user_agent" $baseurl$url
-    
-  echo
 
 }
 
