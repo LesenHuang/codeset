@@ -41,7 +41,7 @@ json_parse() {
   json=$1
   name=$2
 
-  echo $json | sed 's/{//g' | sed 's/}//g' | sed 's/"//g' | sed 's/,/\n/g' | grep $name | sed 's/'$name'://g'
+  echo "$json" | sed 's/{//g' | sed 's/}//g' | sed 's/"//g' | sed 's/,/\n/g' | grep $name | sed 's/'$name'://g'
 }
 
 get_id() {
@@ -197,7 +197,7 @@ setup() {
       json_pun=$(get_info 2> /dev/null)
 
       [ ! "$json_pun" ] && exiterr "setup json_pun is not exist."
-      username=`json_parse "$json_pun" 'name'`
+      username=`json_parse $json_pun 'name'`
       echo "$json_pun"
 
       [ ! "$username" ] && exiterr "username is not exist."
