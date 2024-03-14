@@ -108,7 +108,6 @@ get_info() {
   url="/yddkService/AttendanceApplication/companies/$company_id/staffs/$staff_id/$option"
 
   curl -A "$user_agent" $baseurl$url | exiterr "get_info curl()."
-  echo
 
 }
 
