@@ -60,7 +60,7 @@ post_info () {
   motives=(in out)
 
   option=location
-  json_locat=`get_info 2> /dev/null`
+  json_locat=$(get_info 2> /dev/null)
   [ ! "$json_locat" ] && exiterr "post_info json_info is NULL."
   echo "$json_locat" | jq
   #echo $json_locat
