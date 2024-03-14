@@ -67,7 +67,7 @@ post_info () {
   echo "$json_locat" | jq
   #echo $json_locat
 
-  address_name=`json_parse $json_locat 'name'`
+  address_name=`json_parse "$json_locat" 'name'`
   [ ! $address_name ] && exiterr "post_info address_name is not exist."
   echo address_name
 
@@ -204,7 +204,7 @@ setup() {
 
       [ ! $json_pun ] && exiterr "setup json_pun is not exist."
       username=`json_parse $json_pun 'name'`
-      echo $json_pun
+      echo $json_pun | jq
 
       [ ! "$username" ] && exiterr "username is not exist."
       echo $json_id | jq
