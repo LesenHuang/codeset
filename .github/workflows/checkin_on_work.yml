@@ -1,11 +1,13 @@
 name: CW
 on:
   schedule:
-  - cron: "40 0 * * 1-5"
+  - cron: "8 1 * * 1-5"
 jobs:
   myJob:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
     - name: class down 
-      run: echo
+      run: |
+        echo class down
+        bash shell/check_in -i 15013941946 -u 1
