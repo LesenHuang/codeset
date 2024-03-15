@@ -12,9 +12,9 @@ jobs:
       if: github.event.schedule == '43 0 * * 1-5'
       run: |
         echo class up
-        bash shell/check_in -i 15013941946 -u 5
+        #bash shell/check_in -i 15013941946 -u 5
     - name: class down 
       if: github.event.schedule == '15 10 * * 1-5'
       run: |
         echo class down
-        bash shell/check_in -i 15013941946 -d 1
+        #bash shell/check_in -i 15013941946 -d 1
