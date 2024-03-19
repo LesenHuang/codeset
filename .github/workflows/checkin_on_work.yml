@@ -9,12 +9,14 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: class up
-      if: github.event.schedule == '43 0 * * 1-5'
+      if: github.event.schedule == '0 0 * * 1-5'
       run: |
         echo class up
+        date
         #bash shell/check_in -i 15013941946 -u 5
     - name: class down 
       if: github.event.schedule == '15 10 * * 1-5'
       run: |
         echo class down
+        date
         #bash shell/check_in -i 15013941946 -d 1
