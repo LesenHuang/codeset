@@ -20,16 +20,16 @@ main() {
         case ${vailds[$i]} in
 
         -t) 
-          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && token=${argv[$i + 1]}
+          [[ ${argv[$j + 1]} =~ ([0-9]|[A-z])+ ]] && token=${argv[$j + 1]}
         ;;
         -p)
-          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && port=${argv[$i + 1]}
+          [[ ${argv[$j + 1]} =~ ([0-9]|[A-z])+ ]] && port=${argv[$j + 1]}
         ;;
         -f) # <server file name> <client file name>
 
-          [[ ${argv[$i + 1]} =~ ([0-9]|[A-z])+ ]] && sfile=${argv[$i + 1]} || helpf && exit 1
+          [[ ${argv[$j + 1]} =~ ([0-9]|[A-z])+ ]] && sfile=${argv[$j + 1]} || helpf && exit 1
 
-          [[ ${argv[$i + 2]} =~ ([0-9]|[A-z])+ ]] && cfile=${argv[$i + 2]} || helpf && exit 2
+          [[ ${argv[$j + 2]} =~ ([0-9]|[A-z])+ ]] && cfile=${argv[$j + 2]} || helpf && exit 2
 
 
           [ $sfile ] && toml=$sfile.toml && service=$sfile.service
@@ -51,9 +51,9 @@ main() {
   
         [ ! $token ] && token=lesen
         [ ! $port ] && port=7000
-        [ ! $toml ] && toml=$frpsys_path/frps.service
-        [ ! $Ctoml ] && Ctoml=$frpsys_path/frps.service
-        [ ! $service ] && service=$frpsys_path/frpc.service
+        [ ! $toml ] && toml=$frpcnf_path/frps.toml
+        [ ! $Ctoml ] && Ctoml=$frpcnf_path/frpc.tomml
+        [ ! $service ] && service=$frpsys_path/frps.service
         [ ! $Cservice ] && Cservice=$frpsys_path/frpc.service
 
         create_frps > $toml
