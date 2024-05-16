@@ -36,7 +36,7 @@ main() {
           [ $cfile ] && Ctoml=$cfile.toml && Cservice=$cfile.service
 
         ;;
-        -h)#TODO
+        -h)
           helpf && exit
         ;;
 
@@ -49,8 +49,8 @@ main() {
 
   done
   
-        [ ! $token ] && token=lesen
-        [ ! $port ] && port=7000
+        [ ! $token ] && token=\"lesen\"
+        [ ! $port ] && port=7001
         [ ! $toml ] && toml=$frpcnf_path/frps.toml
         [ ! $Ctoml ] && Ctoml=$frpcnf_path/frpc.tomml
         [ ! $service ] && service=$frpsys_path/frps.service
@@ -102,7 +102,7 @@ create_frps() {
 
 create_frpc() {
 
-  echo "serverAddr = `curl zx2c4.com/ip >/dev/null`"
+  echo "serverAddr = \"`curl zx2c4.com/ip 2>/dev/null`\""
   echo "serverPort = $port"
   echo "auth.token = $token"
 
